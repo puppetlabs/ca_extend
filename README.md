@@ -59,7 +59,7 @@ There are also two complementary tasks to check the expiration date of the CA ce
 This module requires [Puppet Bolt](https://puppet.com/docs/bolt/latest/bolt_installing.html) >= 1.21.0 on either on the Master or an agent.
 
 The recommended procedure for installation this module is to use a [Bolt Puppetfile](https://puppet.com/docs/bolt/latest/installing_tasks_from_the_forge.html#task-8928).
-From within a [Boltdir](https://puppet.com/docs/bolt/latest/bolt_project_directories.html#embedded-project-directory), specify this module and `puppetlabs-stdlib` as dependencies and run `bolt puppetfile install`.
+When creating a [Bolt project](https://puppet.com/docs/bolt/latest/bolt_project_directories.html#embedded-project-directory), specify this module and `puppetlabs-stdlib` as dependencies and run `bolt install modules`.
 
 For example, to install Bolt and the required modules on a Master running EL 7:
 
@@ -69,17 +69,15 @@ sudo yum install puppet-bolt
 ```
 
 ```bash
-mkdir -p ~/Boltdir
+mkdir -p ~/expiry
 cd !$
 
-cat >>Puppetfile <<EOF
-mod 'puppetlabs-stdlib'
+bolt project init expiry --modules puppetlabs-stdlib,puppetlabs-ca_extend
 
-mod 'puppetlabs-ca_extend'
-EOF
-
-bolt puppetfile install
+bolt module install
 ```
+
+If not directly connected to the internet, you may need to [configure a proxy](https://puppet.com/docs/bolt/latest/bolt_installing_modules.html#install-modules-using-a-proxy) in your `bolt-defaults.yaml`.
 
 See the "Usage" section for how to run the tasks and plans remotely or locally on the master.
 
