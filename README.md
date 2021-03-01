@@ -68,16 +68,38 @@ sudo rpm -Uvh https://yum.puppet.com/puppet-tools-release-el-7.noarch.rpm
 sudo yum install puppet-bolt
 ```
 
+If your primary Puppet server or workstation has internet access, the project can be initialized with the needed dependencies with the following:
 ```bash
-mkdir -p ~/expiry
+mkdir ca_extend
 cd !$
 
 bolt project init expiry --modules puppetlabs-stdlib,puppetlabs-ca_extend
-
-bolt module install
 ```
 
-If not directly connected to the internet, you may need to [configure a proxy](https://puppet.com/docs/bolt/latest/bolt_installing_modules.html#install-modules-using-a-proxy) in your `bolt-defaults.yaml`.
+Otherwise, if your primary Puppet server or workstation operates behind a proxy, initialize the project without the `--modules` option
+```bash
+mkdir ca_extend
+cd !$
+
+bolt project init expiry
+```
+
+Then edit your `bolt-project.yaml` to use the proxy according to the [documentation](https://puppet.com/docs/bolt/latest/bolt_installing_modules.html#install-modules-using-a-proxy).  Next, add the module dependencies to `bolt-project.yaml`:
+
+```
+---
+name: expiry
+modules:
+  - name: puppetlabs-stdlib
+  - name: puppetlabs-ca_extend
+
+```
+
+Finally, install the modules.
+
+```bash
+bolt module install
+```
 
 See the "Usage" section for how to run the tasks and plans remotely or locally on the master.
 
