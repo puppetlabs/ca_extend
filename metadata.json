@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-ca_extend",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": "Adrian Parreiras Horta",
   "summary": "A set of Bolt Plans and Tasks to extend the CA cert in Puppet Enterprise",
   "license": "GPL-2.0-only",
