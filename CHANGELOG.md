@@ -4,12 +4,16 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [v3.0.0](https://github.com/puppetlabs/ca_extend/tree/v3.0.0) (2021-08-18)
 
-[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/fd9f05b17f65770910b3146688ed702011b62802...v3.0.0)
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v2.1.0...v3.0.0)
 
 ### Changed
 
 - Remove harmful terms from ca\_extend [\#40](https://github.com/puppetlabs/ca_extend/pull/40) ([gavindidrichsen](https://github.com/gavindidrichsen))
 - \(SUP-2497\) Remove EOL platforms and versions [\#39](https://github.com/puppetlabs/ca_extend/pull/39) ([m0dular](https://github.com/m0dular))
+
+## [v2.1.0](https://github.com/puppetlabs/ca_extend/tree/v2.1.0) (2021-08-02)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.3.0...v2.1.0)
 
 ### Added
 
@@ -20,6 +24,34 @@ All notable changes to this project will be documented in this file. The format 
 
 - Remove hard-coded paths from scripts [\#30](https://github.com/puppetlabs/ca_extend/pull/30) ([m0dular](https://github.com/m0dular))
 - Check for cadir during primary cert regen [\#28](https://github.com/puppetlabs/ca_extend/pull/28) ([m0dular](https://github.com/m0dular))
+
+## [v1.3.0](https://github.com/puppetlabs/ca_extend/tree/v1.3.0) (2021-03-02)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.2.1...v1.3.0)
+
+## [v1.2.1](https://github.com/puppetlabs/ca_extend/tree/v1.2.1) (2021-02-05)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.2.0...v1.2.1)
+
+## [v1.2.0](https://github.com/puppetlabs/ca_extend/tree/v1.2.0) (2020-11-24)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.1.1...v1.2.0)
+
+## [v1.1.1](https://github.com/puppetlabs/ca_extend/tree/v1.1.1) (2020-04-13)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.0.1...v1.1.1)
+
+## [v1.0.1](https://github.com/puppetlabs/ca_extend/tree/v1.0.1) (2019-12-03)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v1.0.0...v1.0.1)
+
+## [v1.0.0](https://github.com/puppetlabs/ca_extend/tree/v1.0.0) (2019-04-30)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v0.1.0...v1.0.0)
+
+## [v0.1.0](https://github.com/puppetlabs/ca_extend/tree/v0.1.0) (2019-03-22)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/fd9f05b17f65770910b3146688ed702011b62802...v0.1.0)
 
 
 
