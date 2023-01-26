@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [v3.3.0](https://github.com/puppetlabs/ca_extend/tree/v3.3.0) (2023-01-26)
 
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v3.3.0...v3.3.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(SUP-3365\) Fix lookup of crl\_results [\#77](https://github.com/puppetlabs/ca_extend/pull/77) ([m0dular](https://github.com/m0dular))
+
+## [v3.3.0](https://github.com/puppetlabs/ca_extend/tree/v3.3.0) (2023-01-26)
+
 [Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v3.2.0...v3.3.0)
-
-### Changed
-
-- Remove harmful terms from ca\_extend [\#40](https://github.com/puppetlabs/ca_extend/pull/40) ([gavindidrichsen](https://github.com/gavindidrichsen))
 
 ### Added
 
@@ -49,6 +53,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Changed
 
+- Remove harmful terms from ca\_extend [\#40](https://github.com/puppetlabs/ca_extend/pull/40) ([gavindidrichsen](https://github.com/gavindidrichsen))
 - \(SUP-2497\) Remove EOL platforms and versions [\#39](https://github.com/puppetlabs/ca_extend/pull/39) ([m0dular](https://github.com/m0dular))
 
 ## [v2.1.0](https://github.com/puppetlabs/ca_extend/tree/v2.1.0) (2021-08-02)
