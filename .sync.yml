@@ -19,11 +19,14 @@ spec/spec_helper.rb:
   delete: true
 Rakefile:
   changelog_user: "puppetlabs"
+  extra_disabled_lint_checks:
+   - unquoted_string_in_case
+   - manifest_whitespace_opening_brace_before
 Gemfile:
   optional:
     ":development":
     - gem: github_changelog_generator
-      version: '= 1.15.2'
+      version: '= 1.16.4'
     - gem: 'octokit'
       version:
        '= 4.21.0'

@@ -1,1 +1,3 @@
 --relative
+--no-unquoted_string_in_case-check
+--no-manifest_whitespace_opening_brace_before-check
