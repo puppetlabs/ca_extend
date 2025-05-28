@@ -141,7 +141,7 @@ plan ca_extend::extend_ca_cert(
     }
     else {
       out::message('INFO: stopping services on compilers')
-      run_task('service::linux', $compilers, 'action' => 'stop', 'name' => 'pe-puppetserver')
+      run_task('service::linux', $compilers, 'action' => 'stop', 'name' => 'puppetserver')
     }
 
     # Run the agent to restart the appropriate services
