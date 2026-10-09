@@ -84,13 +84,13 @@ plan ca_extend::extend_ca_cert(
     run_command("/bin/cp ${new_cert['new_cert']} ${ssldir}/ca/ca_crt.pem", $targets)
     run_task('service::linux', $targets, 'action' => 'start', 'name' => 'puppetserver')
   }
-  run_task('service::linux', $targets, 'action' => 'start', 'name' => 'puppet')
 
   $tmp = run_command('mktemp', 'localhost', '_run_as' => system::env('USER'))
   $tmp_file = $tmp.first.value['stdout'].chomp
   file::write($tmp_file, $cert_contents)
 
   run_command('/opt/puppetlabs/bin/puppet agent --no-daemonize --no-noop --onetime', $targets)
+  run_task('service::linux', $targets, 'action' => 'start', 'name' => 'puppet')
 
   if $is_pe and $replica {
     out::message("INFO: Stopping Puppet services on ${replica}")
