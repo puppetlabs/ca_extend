@@ -29,4 +29,4 @@ Gemfile:
       version: '= 1.15.2'
     - gem: 'octokit'
       version:
-       '= 4.21.0'
+       '= 4.25.1'
