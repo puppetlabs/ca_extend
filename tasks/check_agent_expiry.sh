@@ -131,7 +131,6 @@ if [ "$ca_storage_backend" = "database" ]; then
   #
   echo "$certificate_statuses" |
     "$RUBY_BIN" -rjson -rtime -e '
-      require "json"
 
       cutoff = Time.at(ARGV[0].to_i)
 
