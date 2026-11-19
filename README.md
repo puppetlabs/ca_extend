@@ -40,6 +40,13 @@ The functionality of this module is composed into two Plans:
 
 Regardless of whether the CA certificate is expired, the `extend_ca_cert` plan may be used to extend its expiration date in-place and configure the primary Puppet server and any Compilers to use it.
 
+On a filesystem CA the certificates are re-issued by a Ruby helper (`files/extend_cert.rb`, run with the Ruby that ships with Puppet) rather than by `openssl ca`.
+A re-issued certificate keeps its subject, key, serial, notBefore and every extension, including a pathlen constraint, the criticality of each extension and any custom extension.
+Only the notAfter (and so the signature) changes; the authorityKeyIdentifier is rebuilt from the issuer, as the CA-DB re-issue (PE-48305) does: it names the issuer by DN and serial only if the old one did.
+Because the serial is kept, an intermediate (or other signer) whose authorityKeyIdentifier names the root by serial still chains to the extended root.
+A certificate that already expires no earlier than the new end date (for example a root that outlives it) is kept as it is, so that it does not block renewing the other certificate of the bundle (the helper's `--keep-if-sufficient`, which extend.sh always passes). A kept certificate must still verify under its issuer's key, and is not capped to its issuer's expiry; the issuer, key and range refusals below still apply to it.
+The helper refuses an issuer certificate whose subject is not the certificate's issuer name, a signing key that does not match the issuer certificate, and a new notAfter that is not in the future, not later than the current one, more than 36500 days ahead, or later than the issuer's.
+
 After the CA certificate has been extended, there are three methods for distributing it to agents:
 
 1. Using the `ca_extend::upload_ca_cert` plan or another method to copy the CA certificate to agents.
@@ -270,21 +277,24 @@ See `REFERENCE.md` for more detailed examples.
 
 Puppet's security is based on a PKI using X.509 certificates.
 
-This module's `ca_extend::extend_ca_cert` plan creates a new self-signed CA certificate using the same keypair as the prior self-signed CA. The new CA has the same:
+This module's `ca_extend::extend_ca_cert` plan re-issues the CA certificate (the root self-signed, an intermediate under the re-issued root) using the same keypair as before. The new certificate has the same:
 
 * Keypair.
 * Subject.
 * Issuer.
+* Serial number.
+* Validity start (notBefore).
 * X509v3 Subject Key Identifier (the fingerprint of the public key).
+* Every other extension (basic constraints with any pathlen, key usage, custom extensions), byte for byte.
 
-The new CA has a different:
+A certificate that is re-issued (not one that is kept because it already expires no earlier than the new end date) has a different:
 
-* Authority Key Identifier (just the serial number, since it's self-signed).
-* Validity period (the point of the whole exercise).
-* Signature (since we changed the serial number and validity period).
+* Validity end (notAfter), which is the point of the whole exercise.
+* Signature (since the validity period changed).
+* Authority Key Identifier, only if the old one named a different key id or issuer: it is rebuilt from the issuer, so it is byte for byte the old one otherwise. It names the issuer by DN and serial only if the old one did.
 
 Since Puppet's services (and other services that use Puppet's PKI) validate certificates by trusting a self-signed CA and comparing its public key to the Signatures and Authority Key Identifiers of the certificates it has issued,
-it's possible to issue a new self-signed CA certificate based on a prior keypair without invalidating any certificates issued by the old CA.
+it's possible to re-issue a CA certificate based on a prior keypair without invalidating any certificates issued by the old CA.
 Once you've done that, it's just a matter of delivering the new CA certificate to every participant in the PKI.
 
 ## How to Report an issue or contribute to the module

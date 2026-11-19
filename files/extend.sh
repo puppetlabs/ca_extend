@@ -3,8 +3,9 @@
 # Puppet CA extension script
 #
 # This script uses the Puppet CA certificates and private
-# keys to generate new CA certificates with extended 15 year
-# lifespans.
+# keys to generate new CA certificates that expire 15 years from
+# now (same subject, key, serial and notBefore). A certificate that
+# already expires no earlier than that is kept as it is.
 #
 # This script operates on 2-certificate CA bundles used by
 # Puppet 6 and later in addition to single-certificate
@@ -18,6 +19,10 @@
 set -e
 
 PUPPET_BIN='/opt/puppetlabs/puppet/bin'
+
+# Re-issues a CA certificate with a later notAfter (or keeps it unchanged if it already expires no
+# earlier), keeping every extension (pathlen included) but the AKI, which is rebuilt from the issuer. Runs with the Ruby that ships with Puppet.
+extend_cert="$(dirname "${BASH_SOURCE[0]}")/extend_cert.rb"
 
 ca_bundle=$("${PUPPET_BIN}/puppet" config print --section master cacert)
 ca_dir=$(dirname "${ca_bundle}")
@@ -61,34 +66,10 @@ else
 fi
 
 
-# Build a temporary directory with files required to renew the CA cert.
+# Build a temporary directory to hold the individual certificates and the renewed ones.
 
 workdir=$(mktemp -d -t puppet_ca_extend.XXX)
 printf 'Using working directory: %s\n' "${workdir}" >&2
-
-touch "${workdir}/inventory"
-touch "${workdir}/inventory.attr"
-cat <<EOT > "${workdir}/openssl.cnf"
-[ca]
-default_ca=ca_settings
-
-[ca_settings]
-serial=${workdir}/serial
-new_certs_dir=${workdir}
-database=${workdir}/inventory
-default_md=sha256
-policy=ca_policy
-x509_extensions=cert_extensions
-
-[ca_policy]
-commonName=supplied
-
-[cert_extensions]
-basicConstraints=critical,CA:TRUE
-keyUsage=keyCertSign,cRLSign
-subjectKeyIdentifier=hash
-authorityKeyIdentifier=keyid:always
-EOT
 
 # Separate CA bundle out into individual certificates
 csplit -szf "${workdir}/puppet-ca-cert-" "${ca_bundle}" '/-----BEGIN CERTIFICATE-----/' '{*}'
@@ -137,11 +118,12 @@ fi
 
 # Extend CA certs
 
-# Compute start and end dates for new certificates.
-# Formats the year as YY instead of YYYY because the latter isn't supported
-# until OpenSSL 1.1.1.
-start_date=$(date -u --date='-24 hours' '+%y%m%d%H%M%SZ')
+# Compute the end date for new certificates. The renewed certificates keep the
+# notBefore of the ones they replace.
+# `end_date` only names the new bundle file. The helper is given the ISO 8601 form,
+# because a two-digit year of 50 or more would be read as 19YY.
 end_date=$(date -u --date='+15 years' '+%y%m%d%H%M%SZ')
+end_date_iso=$(date -u --date='+15 years' '+%Y-%m-%dT%H:%M:%SZ')
 
 root_subject=$("${PUPPET_BIN}/openssl" x509 -in "${root_cert}" -noout -subject|cut -d= -f2-)
 root_issuer=$("${PUPPET_BIN}/openssl" x509 -in "${root_cert}" -noout -issuer|cut -d= -f2-)
@@ -163,23 +145,15 @@ printf 'Issuer: %s\n' "${root_issuer}" >&2
 printf 'Serial: %s\n' "${root_serial_num}" >&2
 printf 'End-Date: %s\n' "${root_enddate}" >&2
 
-# Generate a signing request from the existing certificate
-"${PUPPET_BIN}/openssl" x509 -x509toreq \
-  -in "${root_cert}" \
-  -signkey "${root_key}" \
-  -out "${workdir}/root_ca.csr.pem"
-
-printf '%s' "${root_serial_num}" > "${workdir}/serial"
-
-yes | "${PUPPET_BIN}/openssl" ca \
-  -notext \
-  -in "${workdir}/root_ca.csr.pem" \
-  -keyfile "${root_key}" \
-  -config "${workdir}/openssl.cnf" \
-  -selfsign \
-  -startdate "${start_date}" \
-  -enddate "${end_date}" \
-  -out "${workdir}/root_ca.renewed.pem" >&2
+# Re-issue the root: same subject, key, serial and extensions (the AKI is rebuilt), a later notAfter.
+# A root that already expires no earlier than the new end date is kept as it is (--keep-if-sufficient), so
+# that it does not block renewing the intermediate.
+"${PUPPET_BIN}/ruby" "${extend_cert}" \
+  --cert "${root_cert}" \
+  --key "${root_key}" \
+  --not-after "${end_date_iso}" \
+  --keep-if-sufficient \
+  --out "${workdir}/root_ca.renewed.pem" >&2
 
 if (( chain_length == 2 )); then
   intermediate_subject=$("${PUPPET_BIN}/openssl" x509 -in "${intermediate_cert}" -noout -subject|cut -d= -f2-)
@@ -202,23 +176,15 @@ if (( chain_length == 2 )); then
   printf 'Serial: %s\n' "${intermediate_serial_num}" >&2
   printf 'End-Date: %s\n' "${intermediate_enddate}" >&2
 
-  # Generate a signing request from the existing certificate
-  "${PUPPET_BIN}/openssl" x509 -x509toreq \
-    -in "${intermediate_cert}" \
-    -signkey "${intermediate_key}" \
-    -out "${workdir}/intermediate_ca.csr.pem"
-
-  printf '%s' "${intermediate_serial_num}" > "${workdir}/serial"
-
-  yes | "${PUPPET_BIN}/openssl" ca \
-    -notext \
-    -in "${workdir}/intermediate_ca.csr.pem" \
-    -cert "${workdir}/root_ca.renewed.pem" \
-    -keyfile "${root_key}" \
-    -config "${workdir}/openssl.cnf" \
-    -startdate "${start_date}" \
-    -enddate "${end_date}" \
-    -out "${workdir}/intermediate_ca.renewed.pem" >&2
+  # Re-issue the intermediate under the renewed root, signed with the root key (kept as it is if
+  # it already expires no earlier than the new end date; it is then not capped to the root's expiry)
+  "${PUPPET_BIN}/ruby" "${extend_cert}" \
+    --cert "${intermediate_cert}" \
+    --issuer-cert "${workdir}/root_ca.renewed.pem" \
+    --key "${root_key}" \
+    --not-after "${end_date_iso}" \
+    --keep-if-sufficient \
+    --out "${workdir}/intermediate_ca.renewed.pem" >&2
 fi
 
 
