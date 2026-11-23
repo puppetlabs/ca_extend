@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v3.5.0](https://github.com/puppetlabs/ca_extend/tree/v3.5.0) (2026-11-23)
+
+[Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v3.5.0...v3.5.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(PE-48316\) Re-sign filesystem CA certificates with a Ruby helper that preserves extensions [\#98](https://github.com/puppetlabs/ca_extend/pull/98) ([jonathannewman](https://github.com/jonathannewman))
+- Refactor check\_agent\_expiry.sh for clarity and structure [\#97](https://github.com/puppetlabs/ca_extend/pull/97) ([jofnjosf](https://github.com/jofnjosf))
+- \(MODULES-11840\) Allow puppetlabs/stdlib 10.x [\#93](https://github.com/puppetlabs/ca_extend/pull/93) ([imaqsood](https://github.com/imaqsood))
+
 ## [v3.5.0](https://github.com/puppetlabs/ca_extend/tree/v3.5.0) (2023-10-03)
 
 [Full Changelog](https://github.com/puppetlabs/ca_extend/compare/v3.4.0...v3.5.0)
