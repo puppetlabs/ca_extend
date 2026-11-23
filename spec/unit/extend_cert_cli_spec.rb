@@ -242,12 +242,17 @@ RSpec.describe 'CaExtend::ExtendCertCli' do
     expect(stderr).to match(%r{Usage:})
   end
 
+  # UTCTime has a two-digit year (RFC 5280: 50 or more is 19YY), so a time computed from the
+  # real clock (as this example once did) is read as 19YY from 2040 on. The clock is frozen and
+  # the certificate under test is rebuilt inside the example, so it does not depend on the date.
   it 'accepts a UTCTime --not-after as well' do
-    utc = (Time.now + (10 * 365 * 86_400)).utc.strftime('%y%m%d%H%M%SZ')
+    now = Time.utc(2030, 1, 1, 12, 0, 0)
+    allow(Time).to receive(:now).and_return(now)
+    File.write(path('root.pem'), make_cert('Puppet CA: root', root_key, root_key, nil, 'CA:TRUE,pathlen:1').to_pem)
     status, _, stderr = run_cli('--cert', path('root.pem'), '--key', path('root_key.pem'),
-                                '--not-after', utc, '--out', out_file)
+                                '--not-after', '400101120000Z', '--out', out_file)
     expect(status).to eq(0), stderr
-    expect(OpenSSL::X509::Certificate.new(File.read(out_file)).not_after).to eq(Time.utc(*utc.scan(%r{\d\d}).first(6).map(&:to_i).tap { |a| a[0] += 2000 }))
+    expect(OpenSSL::X509::Certificate.new(File.read(out_file)).not_after).to eq(Time.utc(2040, 1, 1, 12, 0, 0))
   end
 
   [['an empty extnValue', '', %r{broken_root\.pem}],
